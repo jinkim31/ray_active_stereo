@@ -15,10 +15,10 @@ lcd_resolution = [3840, 2160]
 decode_maps = []
 decode_masks = []
 for subdir in os.listdir(os.path.join(decode_maps_dir, 'decode_maps')):
-    x = os.path.join(decode_maps_dir, 'decode_maps', subdir, 'x')
-    y = os.path.join(decode_maps_dir, 'decode_maps', subdir, 'y')
+    x = np.load(os.path.join(decode_maps_dir, 'decode_maps', subdir, 'x'))
+    y = np.load(os.path.join(decode_maps_dir, 'decode_maps', subdir, 'y'))
     decode_maps.append([x, y])
-    decode_masks.append([x > 0, y>0])
+    decode_masks.append([x > 0, y > 0])
 
 # Calibrate
 ray_calibrate(decode_maps, decode_masks, target_size=lcd_resolution)
