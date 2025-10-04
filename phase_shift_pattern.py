@@ -60,8 +60,8 @@ class PhaseShiftPattern(object):
         # Find wrapped phase
         wrapped_phases = []
         while 0 < captures.size:
-            wrapped_phases.append(self.find_wrapped_phase(captures[:3], valid_mask))
-            captures = captures[3:]
+            wrapped_phases.append(self.find_wrapped_phase(captures[:3]))
+            captures = captures[3:] # Remove 3 from array
         wrapped_phases_x = wrapped_phases[:len(self.periods_x)]
         wrapped_phases_y = wrapped_phases[len(self.periods_x):]
 
@@ -69,16 +69,24 @@ class PhaseShiftPattern(object):
         unwrapped_phase_x = self.unwrap_phase(wrapped_phases_x, self.frequency_multipliers[0], x_phases_range)
         unwrapped_phase_y = self.unwrap_phase(wrapped_phases_y, self.frequency_multipliers[1], y_phases_range)
 
-        return unwrapped_phase_x * self.display_resolution[0], unwrapped_phase_y * self.display_resolution[1]
+        # Mask invalid pixels as NaN
+        unwrapped_phase_x[valid_mask == 0] = np.nan
+        unwrapped_phase_y[valid_mask == 0] = np.nan
+
+        # Get decode map my multiplying LCD resolution
+        decode_maps = np.stack([unwrapped_phase_x, unwrapped_phase_y], axis=-1)
+
+        print(f'!!!!!{decode_maps.shape}')
+
+        return decode_maps
 
     @staticmethod
     def map_phase_positive(phases):
         return (phases + 2 * np.pi) % (2 * np.pi)
 
     @staticmethod
-    def find_wrapped_phase(captures, valid_mask):
-        phase = PhaseShiftPattern.map_phase_positive(np.arctan2(np.sqrt(3) * (captures[0] - captures[2]), 2 * captures[1] - captures[0] - captures[2]))
-        return phase * (0 < valid_mask)
+    def find_wrapped_phase(captures):
+        return PhaseShiftPattern.map_phase_positive(np.arctan2(np.sqrt(3) * (captures[0] - captures[2]), 2 * captures[1] - captures[0] - captures[2]))
 
     @staticmethod
     def unwrap_phase(wrapped_phases, frequency_multiplier, phase_range):
