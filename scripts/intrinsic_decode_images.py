@@ -28,7 +28,7 @@ for i, subdir_images in enumerate(images):
     # Save decode maps
     decode_map_dir = os.path.join(result_dir, 'decode_maps')
     os.makedirs(decode_map_dir, exist_ok=True)
-    np.save(os.path.join(decode_map_dir, f'{i:02d}.npy'), np.stack(decode_maps, axis=-1))
+    np.save(os.path.join(decode_map_dir, f'{i:02d}.npy'), decode_maps)
 
     # Save plot
     fig, axes = plt.subplots(2, 2, figsize=(8, 8))

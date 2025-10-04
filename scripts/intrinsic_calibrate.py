@@ -10,18 +10,17 @@ import ray_calibration
 import random
 import os
 
-decode_map_dir = '../results/intrinsic_decode_maps/192.168.1.210/decode_maps'
-result_dir = '../results/intrinsic_results/192.168.1.210'
+decode_map_dir = '../results/intrinsic_decode_maps/192.168.1.200/decode_maps'
+result_dir = '../results/intrinsic_results/192.168.1.200'
 
 def get_rt(decode_maps):
     # Arguments
-    lcd_resolution = [3840, 2160]
     lcd_size = [700, 400]
 
     # Convert pixel index to meters
     decode_maps = np.stack([
-        decode_maps[..., 0] / lcd_resolution[0] * lcd_size[0],
-        decode_maps[..., 1] / lcd_resolution[1] * lcd_size[1],  # use lcd_size[1] for Y
+        decode_maps[..., 0] * lcd_size[0],
+        decode_maps[..., 1] * lcd_size[1],  # use lcd_size[1] for Y
     ], axis=-1)
 
     # Intrinsic calibration data
@@ -109,10 +108,6 @@ if __name__ == '__main__':
     decode_maps = np.stack(decode_maps_list, axis=0)
 
     rvec, tvec = get_rt(decode_maps)
-
-    decode_x = decode_maps[..., 0] / lcd_resolution[1]
-    decode_y = decode_maps[..., 1] / lcd_resolution[0]
-    decode_maps = np.stack([decode_x, decode_y], axis=-1)
     decode_masks = (~np.isnan(decode_maps[..., 0])) * 1
     mask = np.isnan(decode_maps)
     decode_maps[mask] = 0
